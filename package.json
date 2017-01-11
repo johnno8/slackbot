@@ -9,6 +9,7 @@
   "author": "john o'keeffe",
   "license": "ISC",
   "dependencies": {
-    "botkit": "^0.4.9"
+    "botkit": "^0.4.9",
+    "dotenv": "^4.0.0"
   }
 }
