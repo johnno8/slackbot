@@ -11,9 +11,14 @@
   "license": "ISC",
   "dependencies": {
     "botkit": "^0.4.9",
-    "dotenv": "^4.0.0",
+    "dotenv": "^4.0.0"
+  },
+  "devDependencies": {
+    "pre-commit": "^1.2.2",
     "snazzy": "^6.0.0",
     "standard": "^8.6.0"
   },
-  "pre-commit": ["lint"]
+  "pre-commit": [
+    "lint"
+  ]
 }

@@ -1,5 +1,5 @@
-require('dotenv').config();
+require('dotenv').config()
 
 module.exports = {
-	slackToken: process.env.SLACK_TOKEN
+  slackToken: process.env.SLACK_TOKEN
 }
