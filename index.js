@@ -45,6 +45,22 @@ controller.hears(['hello'], ['message_received','direct_message','direct_mention
         convo.say('Ah yeah, I know it well, nice place!');
         convo.say('Talk to you later...');
         convo.next();
+        convo.on('end',function(convo) {
+
+  if (convo.status=='completed') {
+    // do something useful with the users responses
+    var res = convo.extractResponses();
+    console.log(JSON.stringify(res));
+    // reference a specific response by key
+    //var value  = convo.extractResponse('key');
+
+    // ... do more stuff...
+
+  } else {
+    // something happened that caused the conversation to stop prematurely
+  }
+
+});
       });
     };
 
