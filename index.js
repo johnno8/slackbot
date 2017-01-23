@@ -5,35 +5,30 @@ const request = require('request')
 const WebClient = require('@slack/client').WebClient
 let projectList = null
 
-const token = process.env.SLACK_TOKEN || ''
-const web = new WebClient(token)
+const web = new WebClient(config.slackToken)
 
 const controller = Botkit.slackbot({
   debug: false,
-  json_file_store: '/Users/johnokeeffe/dev/slackbot/users.json'
+  json_file_store: './slackdata'
   // include "log: false" to disable logging
   // or a "logLevel" integer from 0 to 7 to adjust logging verbosity
 })
 
-getProjects(function (err, projects) {
+let year = new Date().getFullYear()
+
+getProjects(year, (err, projects) => {
   if (err) console.log(err)
-  else {
-    projectList = projects
-    console.log('2017 projects retrieved ok\n')
-  }
-})
+  projectList = projects
+  console.log('2017 projects retrieved ok')
 
-getUsers(function (err, users) {
-  if (err) console.log(err + ' c')
-  else {
+  getUsers((err, users) => {
+    if (err) console.log(err)
     console.log('users retrieved ok')
-  }
+    controller.spawn({
+      token: config.slackToken
+    }).startRTM()
+  })
 })
-
-// connect the bot to a stream of messages
-controller.spawn({
-  token: config.slackToken
-}).startRTM()
 
 controller.hears(['hello'], ['message_received', 'direct_message', 'direct_mention', 'mention'], function (bot, message) {
   let userDetails
@@ -89,7 +84,6 @@ controller.hears(['hello'], ['message_received', 'direct_message', 'direct_menti
           console.log('The file was saved!')
         })
       } else {
-        // something happened that caused the conversation to stop prematurely
         console.log('Conversation ended prematurely due to unknown error')
       }
     })
@@ -99,24 +93,22 @@ controller.hears(['hello'], ['message_received', 'direct_message', 'direct_menti
 })
 
 function getUsers (callback) {
-  web.users.list(token, (err, response) => {
-    if (!err) {
-      response.members.forEach((user) => {
-      // need to get id for each user and pass it into the save below
-        controller.storage.users.save(user, function (err) {
-          if (err) console.log(err + ' a')
-        })
+  web.users.list((err, response) => {
+    if (err) callback(err)
+    response.members.forEach((user) => {
+    // need to get id for each user and pass it into the save below
+      controller.storage.users.save(user, function (err) {
+        if (err) console.log(err)
       })
-      callback(null, response)
-    } else callback(err + ' b')
+    })
+    callback(null, response)
   })
 }
 
-function getProjects (callback) {
-  request('http://jenny-production-ecs-1811095239.eu-west-1.elb.amazonaws.com/api/projects/2017', (error, response, body) => {
-    if (!error && response.statusCode === 200) {
-      let info = JSON.parse(body)
-      callback(null, info.projects)
-    } else callback(error)
+function getProjects (year, callback) {
+  request(config.alphaGatewayURL + '/api/projects/' + year, (err, response, body) => {
+    if (err) callback(err)
+    let info = JSON.parse(body)
+    callback(null, info.projects)
   })
 }
