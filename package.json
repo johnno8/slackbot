@@ -10,8 +10,10 @@
   "author": "john o'keeffe",
   "license": "ISC",
   "dependencies": {
+    "@slack/client": "^3.8.1",
     "botkit": "^0.4.9",
-    "dotenv": "^4.0.0"
+    "dotenv": "^4.0.0",
+    "request": "^2.79.0"
   },
   "devDependencies": {
     "pre-commit": "^1.2.2",
