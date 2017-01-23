@@ -2,45 +2,33 @@ const Botkit = require('botkit')
 const config = require('./config')
 const fs = require('fs')
 const request = require('request')
+const WebClient = require('@slack/client').WebClient
 let projectList = null
+
+const web = new WebClient(config.slackToken)
 
 const controller = Botkit.slackbot({
   debug: false,
-  json_file_store: '/Users/johnokeeffe/dev/slackbot/users.json'
+  json_file_store: './slackdata'
   // include "log: false" to disable logging
   // or a "logLevel" integer from 0 to 7 to adjust logging verbosity
 })
 
-// connect the bot to a stream of messages
-controller.spawn({
-  token: config.slackToken
-}).startRTM()
+let year = new Date().getFullYear()
 
-getProjects(function (err, projects) {
-  if (err) console.log(err)
-  else {
-    projectList = projects
-    console.log('2017 projects retrieved ok\n')
-  }
-})
+getProjects(year, (err, projects) => {
+  if (err) return console.log(err)
+  projectList = projects
+  console.log('2017 projects retrieved ok')
 
-controller.on('rtm_open', function (bot, message) {
-  getUsers(bot)
-  console.log(projectList[0])
-})
-
-/* let getUser = function (bot, user, callback) {
-  controller.storage.users.get(user, function(err, user_data) {
-    if (err) {
-      console.log(err)
-      getUsers(bot)
-    }
-    callback(null, user)
+  getUsers((err, users) => {
+    if (err) return console.log(err)
+    console.log('users retrieved ok')
+    controller.spawn({
+      token: config.slackToken
+    }).startRTM()
   })
-} */
-/* getUser(bot, 'dara', function(err, dara) {
-  console
-}) */
+})
 
 controller.hears(['hello'], ['message_received', 'direct_message', 'direct_mention', 'mention'], function (bot, message) {
   let userDetails
@@ -63,14 +51,10 @@ controller.hears(['hello'], ['message_received', 'direct_message', 'direct_menti
 
   let askAge = function (response, convo) {
     convo.ask('What age are you ' + userDetails.profile.first_name + '?', function (response, convo) {
-      //let num = JSON.stringify(response)
       console.log(response)
       convo.say('That old? Ok!')
-      
-      //if (!function isNumeric (num) { return !isNaN(parseFloat(num)) && isFinite(num); }) {
-      //if (!function isNumeric (num) {}) {
-      //if (!function isNumeric(num) { return (num > 0 || num === 0 || num === '0' || num < 0) && num !== true && isFinite(num) }) {
-      if (isNaN(response.text)){
+
+      if (isNaN(response.text)) {
         convo.stop()
       }
       askWhereFrom(response, convo)
@@ -100,7 +84,6 @@ controller.hears(['hello'], ['message_received', 'direct_message', 'direct_menti
           console.log('The file was saved!')
         })
       } else {
-        // something happened that caused the conversation to stop prematurely
         console.log('Conversation ended prematurely due to unknown error')
       }
     })
@@ -109,31 +92,23 @@ controller.hears(['hello'], ['message_received', 'direct_message', 'direct_menti
   bot.startConversation(message, askName)
 })
 
-let getUsers = function (bot) {
-  bot.api.users.list({}, (err, response) => {
-    if (err) return err
-    // console.log(response.members[0])
+function getUsers (callback) {
+  web.users.list((err, response) => {
+    if (err) return callback(err)
     response.members.forEach((user) => {
-      // need to get id for each user and pass it into the save below
+    // need to get id for each user and pass it into the save below
       controller.storage.users.save(user, function (err) {
         if (err) console.log(err)
       })
     })
-    return response
+    callback(null, response)
   })
 }
 
-function getProjects (callback) {
-  request('http://jenny-production-ecs-1811095239.eu-west-1.elb.amazonaws.com/api/projects/2017', (error, response, body) => {
-    if (!error && response.statusCode === 200) {
-      let info = JSON.parse(body)
-      // console.log('\nJenny Pojects 2017:\n')
-      /* info.projects.forEach(function (project) {
-        console.log(project.name)
-      }) */
-      // projectList = info.projects
-      callback(null, info.projects)
-    } else callback(error)
+function getProjects (year, callback) {
+  request(config.alphaGatewayURL + '/api/projects/' + year, (err, response, body) => {
+    if (err) return callback(err)
+    let info = JSON.parse(body)
+    callback(null, info.projects)
   })
 }
-
