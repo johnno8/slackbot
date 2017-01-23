@@ -17,12 +17,12 @@ const controller = Botkit.slackbot({
 let year = new Date().getFullYear()
 
 getProjects(year, (err, projects) => {
-  if (err) console.log(err)
+  if (err) return console.log(err)
   projectList = projects
   console.log('2017 projects retrieved ok')
 
   getUsers((err, users) => {
-    if (err) console.log(err)
+    if (err) return console.log(err)
     console.log('users retrieved ok')
     controller.spawn({
       token: config.slackToken
@@ -94,7 +94,7 @@ controller.hears(['hello'], ['message_received', 'direct_message', 'direct_menti
 
 function getUsers (callback) {
   web.users.list((err, response) => {
-    if (err) callback(err)
+    if (err) return callback(err)
     response.members.forEach((user) => {
     // need to get id for each user and pass it into the save below
       controller.storage.users.save(user, function (err) {
@@ -107,7 +107,7 @@ function getUsers (callback) {
 
 function getProjects (year, callback) {
   request(config.alphaGatewayURL + '/api/projects/' + year, (err, response, body) => {
-    if (err) callback(err)
+    if (err) return callback(err)
     let info = JSON.parse(body)
     callback(null, info.projects)
   })
