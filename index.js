@@ -24,6 +24,7 @@ projects.getProjects(year, (err, projects) => {
   if (err) return console.log(err)
   projectList = projects
   console.log('2017 projects retrieved ok')
+  console.log(projectList[0])
 
   users.getUsers(controller, (err, users) => {
     if (err) return console.log(err)
