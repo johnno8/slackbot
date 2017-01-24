@@ -3,7 +3,7 @@
 
 const Botkit = require('botkit')
 const config = require('./config')
-//const request = require('request')
+// const request = require('request')
 const conversation = require('./lib/conversation/hello')
 const users = require('./lib/users/users')
 const projects = require('./lib/projects/projects')
@@ -42,4 +42,4 @@ function getProjects (year, callback) {
     let info = JSON.parse(body)
     callback(null, info.projects)
   })
-}*/
+} */
