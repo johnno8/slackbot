@@ -1,0 +1,12 @@
+machine:
+  node:
+    version: 6.9.1
+  services:
+    - docker
+
+deployment:
+  staging:
+    branch: master
+    commands:
+      - docker build -t $IMAGE
+      - docker tag $IMAGE:latest $IMAGE:build-$CIRCLE_BUILD_NUM
