@@ -8,5 +8,5 @@ deployment:
   staging:
     branch: master
     commands:
-      - docker build -t $IMAGE .
-      - docker tag $IMAGE:latest $IMAGE:build-$CIRCLE_BUILD_NUM
+      - chmod +x ./deploy/*.sh
+      - ./deploy/docker-push.sh staging
