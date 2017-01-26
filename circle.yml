@@ -4,9 +4,14 @@ machine:
   services:
     - docker
 
+dependencies:
+  pre:
+    - npm install -g ecsdeploy 
+
 deployment:
   staging:
     branch: master
     commands:
       - chmod +x ./deploy/*.sh
       - ./deploy/docker-push.sh staging
+      - node deploy/task_def.js | ecsdeploy -s $SERVICE_NAME -c $CLUSTER_NAME
